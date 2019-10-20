@@ -1,0 +1,88 @@
+{
+    "name": "assets/6_2gGwLWWHN",
+    "displayName": "Happy Turkey Day!",
+    "authorName": "Zan Isgett",
+    "description": "#thanksgiving #turkey #pilgrim #holiday",
+    "createTime": "2017-11-06T21:08:08.975118Z",
+    "updateTime": "2019-09-14T02:27:36.450094Z",
+    "formats": [
+      {
+        "root": {
+          "relativePath": "model.obj",
+          "url": "https://poly.googleapis.com/downloads/fp/1568428056450094/6_2gGwLWWHN/2fjlcvDtM61/model.obj",
+          "contentType": "text/plain"
+        },
+        "resources": [
+          {
+            "relativePath": "materials.mtl",
+            "url": "https://poly.googleapis.com/downloads/fp/1568428056450094/6_2gGwLWWHN/2fjlcvDtM61/materials.mtl",
+            "contentType": "text/plain"
+          }
+        ],
+        "formatComplexity": {
+          "triangleCount": "2145"
+        },
+        "formatType": "OBJ"
+      },
+      {
+        "root": {
+          "relativePath": "model.fbx",
+          "url": "https://poly.googleapis.com/downloads/fp/1568428056450094/6_2gGwLWWHN/5yj8Kskb-QE/model.fbx",
+          "contentType": "application/octet-stream"
+        },
+        "formatComplexity": {},
+        "formatType": "FBX"
+      },
+      {
+        "root": {
+          "relativePath": "model.gltf",
+          "url": "https://poly.googleapis.com/downloads/fp/1568428056450094/6_2gGwLWWHN/5tDSnSpY5Nw/model.gltf",
+          "contentType": "model/gltf+json"
+        },
+        "resources": [
+          {
+            "relativePath": "model.bin",
+            "url": "https://poly.googleapis.com/downloads/fp/1568428056450094/6_2gGwLWWHN/5tDSnSpY5Nw/model.bin",
+            "contentType": "application/octet-stream"
+          }
+        ],
+        "formatComplexity": {
+          "triangleCount": "3724"
+        },
+        "formatType": "GLTF"
+      },
+      {
+        "root": {
+          "relativePath": "model.gltf",
+          "url": "https://poly.googleapis.com/downloads/fp/1568428056450094/6_2gGwLWWHN/0lxIqG--3G8/model.gltf",
+          "contentType": "model/gltf+json"
+        },
+        "resources": [
+          {
+            "relativePath": "model.bin",
+            "url": "https://poly.googleapis.com/downloads/fp/1568428056450094/6_2gGwLWWHN/0lxIqG--3G8/model.bin",
+            "contentType": "application/octet-stream"
+          }
+        ],
+        "formatComplexity": {
+          "triangleCount": "3724"
+        },
+        "formatType": "GLTF2"
+      }
+    ],
+    "thumbnail": {
+      "relativePath": "6_2gGwLWWHN.png",
+      "url": "https://lh3.googleusercontent.com/uHdL3xHGMbB8aLF788tadXgnsLf_bCsS2pbnXEL9r1squ8enWrHjk-NzD2XoNWA",
+      "contentType": "image/png"
+    },
+    "license": "CREATIVE_COMMONS_BY",
+    "visibility": "PUBLIC",
+    "isCurated": true,
+    "presentationParams": {
+      "orientingRotation": {
+        "w": 1
+      },
+      "colorSpace": "LINEAR",
+      "backgroundColor": "#bf360c"
+    }
+  }

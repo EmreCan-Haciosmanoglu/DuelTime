@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
 });*/
 import React from 'react';
 import { Asset } from 'expo-asset';
+import { Text, ScrollView, View, TextInput, Button, Image } from 'react-native'
 import { AR } from 'expo';
 // Let's alias ExpoTHREE.AR as ThreeAR so it doesn't collide with Expo.AR.
 import ExpoTHREE, { THREE } from 'expo-three';
@@ -71,20 +72,42 @@ import * as ThreeAR from 'expo-three-ar'
 // it also provides debug information with `isArCameraStateEnabled`
 import { View as GraphicsView } from 'expo-graphics';
 
+import ApiKeys from './constants/ApiKeys';
+import GooglePoly from './api/GooglePoly';
+import TurkeyObject from './assets/TurkeyObject.json';
+import { GooglePolyAsset } from './components/AppComponents';
+//import { ScrollView } from 'react-native-gesture-handler';
+
 export default class App extends React.Component {
   componentDidMount() {
     // Turn off extra warnings
     THREE.suppressExpoWarnings(true)
     ThreeAR.suppressWarnings()
   }
-  
+
+  constructor(props) {
+    super(props);
+
+    this.googlePoly = new GooglePoly(ApiKeys.GooglePoly);
+
+    this.googlePoly.getResearchResults('duck', '').then(assets => {
+      const json = JSON.stringify(assets[0]);
+      //console.log(json);
+    });
+
+    this.state = {
+      searchQuery: "",
+      currentResults: [],
+    }
+  }
+
   render() {
     // You need to add the `isArEnabled` & `arTrackingConfiguration` props.
     // `isArRunningStateEnabled` Will show us the play/pause button in the corner.
     // `isArCameraStateEnabled` Will render the camera tracking information on the screen.
     // `arTrackingConfiguration` denotes which camera the AR Session will use. 
     // World for rear, Face for front (iPhone X only)
-    return (
+    /*return (
       <GraphicsView
         style={{ flex: 1 }}
         onContextCreate={this.onContextCreate}
@@ -95,7 +118,53 @@ export default class App extends React.Component {
         isArCameraStateEnabled
         arTrackingConfiguration={'ARWorldTrackingConfiguration'}
       />
+    );*/
+
+    return (
+      <ScrollView style={{ paddingTop: 20 }}>
+        <TextInput
+          style={{ borderWidth: 1, height: 40 }}
+          placeholder="Search..."
+          value={this.state.searchQuery}
+          onChangeText={this.onSearchChangeText}
+        />
+        <Button title="Search" onPress={this.onSearchPress} />
+        {this.renderCurrentResults()}
+        <Button title="Load More..." onPress={this.onLoadMorePress} />
+        <View style={{ paddingTop: 40 }} />
+      </ScrollView>
     );
+  }
+
+  renderCurrentResults() {
+    if (this.state.currentResults.length == 0)
+      return <Text>No Results</Text>
+
+    return this.state.currentResults.map((asset, index) => {
+      return (
+        <GooglePolyAsset asset={asset} key={index} />
+      );
+    });
+  }
+
+  onLoadMorePress = () => {
+
+    this.googlePoly.getResearchResults().then(function (assets) {
+      this.setState({ currentResults: this.googlePoly.currentResults });
+    }.bind(this));
+  }
+
+  onSearchPress = () => {
+    var keyword = this.state.searchQuery;
+    this.googlePoly.setSearchParams(keyword);
+
+    this.googlePoly.getResearchResults().then(function (assets) {
+      this.setState({ currentResults: this.googlePoly.currentResults });
+    }.bind(this));
+  }
+
+  onSearchChangeText = (text) => {
+    this.setState({ searchQuery: text });
   }
 
   // When our context is built we can start coding 3D things.
@@ -118,21 +187,21 @@ export default class App extends React.Component {
     // Now we make a camera that matches the device orientation. 
     // Ex: When we look down this camera will rotate to look down too!
     this.camera = new ThreeAR.Camera(width, height, 0.01, 1000);
-    
+
     // Make a cube - notice that each unit is 1 meter in real life, we will make our box 0.1 meters
     const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
     // Simple color material
     const material = new THREE.MeshPhongMaterial({
       color: 0xff00ff,
     });
-    
+
     // Combine our geometry and material
     this.cube = new THREE.Mesh(geometry, material);
     // Place the box 0.4 meters in front of us.
     this.cube.position.z = -0.4
     // Add the cube to the scene
     this.scene.add(this.cube);
-    
+
     // Setup a light so we can see the cube color
     // AmbientLight colors all things in the scene equally.
     this.scene.add(new THREE.AmbientLight(0xffffff));
@@ -158,7 +227,7 @@ export default class App extends React.Component {
   // Called every frame.
   onRender = () => {
     // This will make the points get more rawDataPoints from Expo.AR
-    this.points.update()
+    //this.points.update()
     // Finally render the scene with the AR Camera
     this.renderer.render(this.scene, this.camera);
   };
