@@ -28,8 +28,21 @@ export default class GooglePolyAsset extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    thumbnail: { width: 150, height: 150, borderRadius: 10 },
-    displayName: { fontWeight: "bold" },
+    thumbnail: {
+        width: 150,
+        height: 150,
+        borderRadius: 15
+    },
+    displayName: {
+        fontWeight: "bold"
+    },
     authorName: {},
-    container: { alignItems: "center" },
+    container: {
+        alignItems: "center",
+        borderRadius: 15,
+        borderWidth: 1,
+        borderColor: "#DDDDDDDD",
+        padding: 5,
+        marginBottom: 15,
+    },
 });

@@ -62,11 +62,11 @@ const styles = StyleSheet.create({
 });*/
 import React from 'react';
 import { Asset } from 'expo-asset';
-import { Text, ScrollView, View, TextInput, Button, Image } from 'react-native'
+import { Text, ScrollView, View, TextInput, Button, Image } from 'react-native';
 import { AR } from 'expo';
 // Let's alias ExpoTHREE.AR as ThreeAR so it doesn't collide with Expo.AR.
 import ExpoTHREE, { THREE } from 'expo-three';
-import * as ThreeAR from 'expo-three-ar'
+import * as ThreeAR from 'expo-three-ar';
 // Let's also import `expo-graphics`
 // expo-graphics manages the setup/teardown of the gl context/ar session, creates a frame-loop, and observes size/orientation changes.
 // it also provides debug information with `isArCameraStateEnabled`
@@ -96,7 +96,7 @@ export default class App extends React.Component {
     });
 
     this.state = {
-      searchQuery: "",
+      searchQuery: "Car",
       currentResults: [],
     }
   }
@@ -123,14 +123,25 @@ export default class App extends React.Component {
     return (
       <ScrollView style={{ paddingTop: 20 }}>
         <TextInput
-          style={{ borderWidth: 1, height: 40 }}
+          style={{
+            borderWidth: 1,
+            height: 40,
+            marginHorizontal: 15,
+            borderRadius: 5,
+            paddingHorizontal: 15,
+          }}
+          autoCapitalize="none"
           placeholder="Search..."
           value={this.state.searchQuery}
           onChangeText={this.onSearchChangeText}
         />
         <Button title="Search" onPress={this.onSearchPress} />
         {this.renderCurrentResults()}
-        <Button title="Load More..." onPress={this.onLoadMorePress} />
+        {
+          (this.googlePoly.nextPageToken == "")
+            ? <View />
+            : <Button title="Load More..." onPress={this.onLoadMorePress} />
+        }
         <View style={{ paddingTop: 40 }} />
       </ScrollView>
     );
@@ -138,20 +149,40 @@ export default class App extends React.Component {
 
   renderCurrentResults() {
     if (this.state.currentResults.length == 0)
-      return <Text>No Results</Text>
-
-    return this.state.currentResults.map((asset, index) => {
       return (
-        <GooglePolyAsset asset={asset} key={index} />
+        <View style={{ flex: 1, alignItems: "center" }}>
+          <Text>No Results</Text>
+        </View>
       );
-    });
+
+    var results = [];
+    for (var i = 0; i < this.state.currentResults.length; i += 2) {
+      if (i == this.state.currentResults.length - 1) {
+        results.push(<GooglePolyAsset asset={this.state.currentResults[i]} key={i} />);
+        break;
+      }
+
+      results.push(
+        <View style={{ flexDirection: "row" }} key={"Row-" + (i / 2)}>
+          <GooglePolyAsset asset={this.state.currentResults[i]} key={i} />
+          <GooglePolyAsset asset={this.state.currentResults[i + 1]} key={i + 1} />
+        </View>
+      );
+
+    }
+    return (
+      <View style={{ flex: 1, alignItems: "center" }}>
+        {results}
+      </View>
+    );
   }
 
   onLoadMorePress = () => {
+    if (this.googlePoly.nextPageToken)
 
-    this.googlePoly.getResearchResults().then(function (assets) {
-      this.setState({ currentResults: this.googlePoly.currentResults });
-    }.bind(this));
+      this.googlePoly.getResearchResults().then(function (assets) {
+        this.setState({ currentResults: this.googlePoly.currentResults });
+      }.bind(this));
   }
 
   onSearchPress = () => {
