@@ -1,68 +1,5 @@
-/*import { AppLoading } from 'expo';
-import { Asset } from 'expo-asset';
-import * as Font from 'expo-font';
-import React, { useState } from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-
-import AppNavigator from './navigation/AppNavigator';
-
-export default function App(props) {
-  const [isLoadingComplete, setLoadingComplete] = useState(false);
-
-  if (!isLoadingComplete && !props.skipLoadingScreen) {
-    return (
-      <AppLoading
-        startAsync={loadResourcesAsync}
-        onError={handleLoadingError}
-        onFinish={() => handleFinishLoading(setLoadingComplete)}
-      />
-    );
-  } else {
-    return (
-      <View style={styles.container}>
-        {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-        <AppNavigator />
-      </View>
-    );
-  }
-}
-
-async function loadResourcesAsync() {
-  await Promise.all([
-    Asset.loadAsync([
-      require('./assets/images/robot-dev.png'),
-      require('./assets/images/robot-prod.png'),
-    ]),
-    Font.loadAsync({
-      // This is the font that we are using for our tab bar
-      ...Ionicons.font,
-      // We include SpaceMono because we use it in HomeScreen.js. Feel free to
-      // remove this if you are not using it in your app
-      'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
-    }),
-  ]);
-}
-
-function handleLoadingError(error) {
-  // In this case, you might want to report the error to your error reporting
-  // service, for example Sentry
-  console.warn(error);
-}
-
-function handleFinishLoading(setLoadingComplete) {
-  setLoadingComplete(true);
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-});*/
 import React from 'react';
-import { Asset } from 'expo-asset';
-import { Text, ScrollView, View, TextInput, Button, Image } from 'react-native';
+import { View, Button, Modal } from 'react-native';
 import { AR } from 'expo';
 // Let's alias ExpoTHREE.AR as ThreeAR so it doesn't collide with Expo.AR.
 import ExpoTHREE, { THREE } from 'expo-three';
@@ -74,8 +11,7 @@ import { View as GraphicsView } from 'expo-graphics';
 
 import ApiKeys from './constants/ApiKeys';
 import GooglePoly from './api/GooglePoly';
-import TurkeyObject from './assets/TurkeyObject.json';
-import { GooglePolyAsset } from './components/AppComponents';
+import { SearchableGooglePolyAssetList } from './components/AppComponents';
 //import { ScrollView } from 'react-native-gesture-handler';
 
 export default class App extends React.Component {
@@ -96,106 +32,67 @@ export default class App extends React.Component {
     });
 
     this.state = {
-      searchQuery: "Car",
-      currentResults: [],
+      searchModalVisible: false,
+      currentAsset: {},
     }
   }
 
   render() {
-    // You need to add the `isArEnabled` & `arTrackingConfiguration` props.
-    // `isArRunningStateEnabled` Will show us the play/pause button in the corner.
-    // `isArCameraStateEnabled` Will render the camera tracking information on the screen.
-    // `arTrackingConfiguration` denotes which camera the AR Session will use. 
-    // World for rear, Face for front (iPhone X only)
-    /*return (
-      <GraphicsView
-        style={{ flex: 1 }}
-        onContextCreate={this.onContextCreate}
-        onRender={this.onRender}
-        onResize={this.onResize}
-        isArEnabled
-        isArRunningStateEnabled
-        isArCameraStateEnabled
-        arTrackingConfiguration={'ARWorldTrackingConfiguration'}
-      />
-    );*/
 
     return (
-      <ScrollView style={{ paddingTop: 20 }}>
-        <TextInput
-          style={{
-            borderWidth: 1,
-            height: 40,
-            marginHorizontal: 15,
-            borderRadius: 5,
-            paddingHorizontal: 15,
-          }}
-          autoCapitalize="none"
-          placeholder="Search..."
-          value={this.state.searchQuery}
-          onChangeText={this.onSearchChangeText}
+      <View style={{ flex: 1 }}>
+        <GraphicsView
+          style={{ flex: 1 }}
+          onContextCreate={this.onContextCreate}
+          onRender={this.onRender}
+          onResize={this.onResize}
+          isArEnabled
+          isArRunningStateEnabled
+          isArCameraStateEnabled
+          arTrackingConfiguration={'ARWorldTrackingConfiguration'}
         />
-        <Button title="Search" onPress={this.onSearchPress} />
-        {this.renderCurrentResults()}
-        {
-          (this.googlePoly.nextPageToken == "")
-            ? <View />
-            : <Button title="Load More..." onPress={this.onLoadMorePress} />
-        }
-        <View style={{ paddingTop: 40 }} />
-      </ScrollView>
-    );
-  }
 
-  renderCurrentResults() {
-    if (this.state.currentResults.length == 0)
-      return (
-        <View style={{ flex: 1, alignItems: "center" }}>
-          <Text>No Results</Text>
-        </View>
-      );
+        <Button title="Add Object" onPress={this.onAddObjectPress} />
+        <Button title="Search" onPress={this.onSearchModalPress} />
 
-    var results = [];
-    for (var i = 0; i < this.state.currentResults.length; i += 2) {
-      if (i == this.state.currentResults.length - 1) {
-        results.push(<GooglePolyAsset asset={this.state.currentResults[i]} key={i} />);
-        break;
-      }
-
-      results.push(
-        <View style={{ flexDirection: "row" }} key={"Row-" + (i / 2)}>
-          <GooglePolyAsset asset={this.state.currentResults[i]} key={i} />
-          <GooglePolyAsset asset={this.state.currentResults[i + 1]} key={i + 1} />
-        </View>
-      );
-
-    }
-    return (
-      <View style={{ flex: 1, alignItems: "center" }}>
-        {results}
+        <Modal visible={this.state.searchModalVisible} animationType="slide">
+          <SearchableGooglePolyAssetList
+            googlePoly={this.googlePoly}
+            onCancelPress={this.onCancelPress}
+            onAssetPress={this.onAssetPress}
+          />
+        </Modal>
       </View>
     );
   }
 
-  onLoadMorePress = () => {
-    if (this.googlePoly.nextPageToken)
+  onAddObjectPress = () => {
+    if (this.threeModel)
+      this.scene.remove(this.threeModel);
 
-      this.googlePoly.getResearchResults().then(function (assets) {
-        this.setState({ currentResults: this.googlePoly.currentResults });
-      }.bind(this));
+    GooglePoly.getThreeModel(this.state.currentAsset, function (object) {
+
+      this.threeModel = object;
+
+      ExpoTHREE.utils.scaleLongestSideToSize(object, 0.75);
+      object.position.z = -3;
+      this.scene.add(object);
+    }.bind(this), function (error) {
+      console.log(error);
+    });
   }
 
-  onSearchPress = () => {
-    var keyword = this.state.searchQuery;
-    this.googlePoly.setSearchParams(keyword);
-
-    this.googlePoly.getResearchResults().then(function (assets) {
-      this.setState({ currentResults: this.googlePoly.currentResults });
-    }.bind(this));
+  onCancelPress = () => {
+    this.setState({ searchModalVisible: false });
   }
 
-  onSearchChangeText = (text) => {
-    this.setState({ searchQuery: text });
+  onAssetPress = (asset) => {
+    this.setState({ currentAsset: asset });
+    this.setState({ searchModalVisible: false });
+  }
+
+  onSearchModalPress = () => {
+    this.setState({ searchModalVisible: true });
   }
 
   // When our context is built we can start coding 3D things.
@@ -215,7 +112,7 @@ export default class App extends React.Component {
     this.scene = new THREE.Scene();
     // This will create a camera texture and use it as the background for our scene
     this.scene.background = new ThreeAR.BackgroundTexture(this.renderer);
-    // Now we make a camera that matches the device orientation. 
+    // Now we make a camera that matches the device orientation.
     // Ex: When we look down this camera will rotate to look down too!
     this.camera = new ThreeAR.Camera(width, height, 0.01, 1000);
 

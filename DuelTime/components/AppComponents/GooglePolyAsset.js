@@ -6,22 +6,15 @@ export default class GooglePolyAsset extends React.Component {
 
     static defaultProps = {
         asset: {},
-        onPress: () => { },
+        onPress: (asset) => { },
     }
 
     render() {
         return (
-            <TouchableOpacity style={styles.container} onPress={this.props.onPress} >
-                <Image
-                    source={{ url: this.props.asset.thumbnail.url }}
-                    style={styles.thumbnail}
-                />
-                <Text style={styles.displayName} >
-                    {this.props.asset.displayName}
-                </Text>
-                <Text style={styles.authorName} >
-                    {this.props.asset.authorName}
-                </Text>
+            <TouchableOpacity style={styles.container} onPress={() => this.props.onPress(this.props.asset)} >
+                <Image source={{ url: this.props.asset.thumbnail.url }} style={styles.thumbnail} />
+                <Text style={styles.displayName} >{this.props.asset.displayName}</Text>
+                <Text style={styles.authorName} >{this.props.asset.authorName}</Text>
             </TouchableOpacity>
         );
     }
