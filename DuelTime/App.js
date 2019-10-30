@@ -12,6 +12,7 @@ import { View as GraphicsView } from 'expo-graphics';
 import ApiKeys from './constants/ApiKeys';
 import GooglePoly from './api/GooglePoly';
 import { SearchableGooglePolyAssetList } from './components/AppComponents';
+import { set } from 'gl-matrix/src/gl-matrix/mat4';
 //import { ScrollView } from 'react-native-gesture-handler';
 
 export default class App extends React.Component {
@@ -26,7 +27,7 @@ export default class App extends React.Component {
 
     this.googlePoly = new GooglePoly(ApiKeys.GooglePoly);
 
-    this.googlePoly.getResearchResults('duck', '').then(assets => {
+    this.googlePoly.getSearchResults('duck', '').then(assets => {
       const json = JSON.stringify(assets[0]);
       //console.log(json);
     });
@@ -34,6 +35,7 @@ export default class App extends React.Component {
     this.state = {
       searchModalVisible: false,
       currentAsset: {},
+      isPaused: false,
     }
   }
 
@@ -49,11 +51,13 @@ export default class App extends React.Component {
           isArEnabled
           isArRunningStateEnabled
           isArCameraStateEnabled
+
           arTrackingConfiguration={'ARWorldTrackingConfiguration'}
         />
 
         <Button title="Add Object" onPress={this.onAddObjectPress} />
         <Button title="Search" onPress={this.onSearchModalPress} />
+        <Button title="Pause" onPress={this.onPausePress} />
 
         <Modal visible={this.state.searchModalVisible} animationType="slide">
           <SearchableGooglePolyAssetList
@@ -62,8 +66,20 @@ export default class App extends React.Component {
             onAssetPress={this.onAssetPress}
           />
         </Modal>
-      </View>
+      </View >
     );
+  }
+
+  onPausePress = () => {
+    if (!this.state.isPaused) {
+      console.log("Ferhat : True");
+      //AR.pause();
+      this.setState({ isPaused: true });
+    }
+    else {
+      //AR.resume();
+      this.setState({ isPaused: false });
+    }
   }
 
   onAddObjectPress = () => {
@@ -126,7 +142,7 @@ export default class App extends React.Component {
     // Combine our geometry and material
     this.cube = new THREE.Mesh(geometry, material);
     // Place the box 0.4 meters in front of us.
-    this.cube.position.z = -0.4
+    this.cube.position.z = -0.4;
     // Add the cube to the scene
     this.scene.add(this.cube);
 
@@ -148,6 +164,7 @@ export default class App extends React.Component {
     }
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
+
     this.renderer.setPixelRatio(scale);
     this.renderer.setSize(width, height);
   };
@@ -156,6 +173,16 @@ export default class App extends React.Component {
   onRender = () => {
     // This will make the points get more rawDataPoints from Expo.AR
     //this.points.update()
+    if (this.state.isPaused) {
+      var camPos = this.camera.getWorldPosition(new ExpoTHREE.THREE.Vector3(0, 0, 0));
+      var newPos = new ExpoTHREE.THREE.Vector3(camPos.x + 0, camPos.y + 0, camPos.z - 0.5);
+      this.cube.position.x = newPos.x;
+      this.cube.position.y = newPos.y;
+      this.cube.position.z = newPos.z;
+    }
+
+    console.log(this.cube.position);
+
     // Finally render the scene with the AR Camera
     this.renderer.render(this.scene, this.camera);
   };

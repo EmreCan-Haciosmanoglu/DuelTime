@@ -38,7 +38,7 @@ export default class GooglePoly {
         this.keywords = keywords;
     }
 
-    getResearchResults() {
+    getSearchResults() {
         const url = GooglePoly.getQueryURL(this.apiKey, this.keywords, this.nextPageToken);
         return fetch(url)
             .then((response) => {
